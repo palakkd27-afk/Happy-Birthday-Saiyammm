@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     // --- Live Age Counter ---
-    const birthDate = new Date('2006-08-14T00:00:00');
+    const birthDate = new Date('2004-05-11T00:00:00');
     const countdownElement = document.getElementById('countdown');
 
     function updateAge() {
@@ -80,12 +80,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
-    // --- Sakura Petal Animation ---
+    // --- Falling Heart Animation ---
     const canvas = document.getElementById('sakura-canvas');
     if (canvas) {
         const ctx = canvas.getContext('2d');
-        let petals = [];
-        const numPetals = 50;
+        let hearts = [];
+        const numHearts = 50;
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -94,59 +94,67 @@ document.addEventListener('DOMContentLoaded', function() {
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        function Petal() {
+        function Heart() {
             this.x = Math.random() * canvas.width;
             this.y = Math.random() * canvas.height * 2 - canvas.height;
-            this.w = 25 + Math.random() * 15;
-            this.h = 20 + Math.random() * 10;
-            this.opacity = this.w / 40;
-            this.flip = Math.random();
-            this.xSpeed = 1.5 + Math.random() * 2;
-            this.ySpeed = 1 + Math.random() * 1;
-            this.flipSpeed = Math.random() * 0.03;
+            this.size = 18 + Math.random() * 20;
+            this.opacity = 0.5 + Math.random() * 0.5;
+            this.xSpeed = 1 + Math.random() * 2;
+            this.ySpeed = 1 + Math.random() * 1.5;
+            this.rotation = Math.random() * Math.PI * 2;
+            this.rotationSpeed = (Math.random() - 0.5) * 0.02;
+            this.color = `hsl(${330 + Math.random() * 20}, 90%, ${65 + Math.random() * 10}%)`;
         }
 
-        Petal.prototype.draw = function() {
-            if (this.y > canvas.height || this.x > canvas.width) {
-                this.x = -this.w;
-                this.y = Math.random() * canvas.height * 2 - canvas.height;
-                this.xSpeed = 1.5 + Math.random() * 2;
-                this.ySpeed = 1 + Math.random() * 1;
-                this.flip = Math.random();
-            }
+        Heart.prototype.draw = function() {
+            const x = this.x;
+            const y = this.y;
+            const s = this.size;
+            ctx.save();
             ctx.globalAlpha = this.opacity;
+            ctx.translate(x, y);
+            ctx.rotate(this.rotation);
             ctx.beginPath();
-            ctx.moveTo(this.x, this.y);
-            ctx.bezierCurveTo(this.x + this.w / 2, this.y - this.h / 2, this.x + this.w, this.y, this.x + this.w / 2, this.y + this.h / 2);
-            ctx.bezierCurveTo(this.x, this.y + this.h, this.x - this.w / 2, this.y, this.x, this.y);
+            ctx.moveTo(0, -s * 0.25);
+            ctx.bezierCurveTo(0, -s * 0.8, -s, -s * 0.8, -s, -s * 0.15);
+            ctx.bezierCurveTo(-s, s * 0.35, -s * 0.45, s * 0.8, 0, s);
+            ctx.bezierCurveTo(s * 0.45, s * 0.8, s, s * 0.35, s, -s * 0.15);
+            ctx.bezierCurveTo(s, -s * 0.8, 0, -s * 0.8, 0, -s * 0.25);
             ctx.closePath();
-            ctx.fillStyle = '#FFB7C5';
+            ctx.fillStyle = this.color;
             ctx.fill();
+            ctx.restore();
         }
 
-        Petal.prototype.update = function() {
+        Heart.prototype.update = function() {
             this.x += this.xSpeed;
             this.y += this.ySpeed;
-            this.flip += this.flipSpeed;
+            this.rotation += this.rotationSpeed;
+            if (this.y - this.size > canvas.height || this.x - this.size > canvas.width) {
+                this.x = Math.random() * canvas.width;
+                this.y = -this.size * 2;
+                this.xSpeed = 1 + Math.random() * 2;
+                this.ySpeed = 1 + Math.random() * 1.5;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.color = `hsl(${330 + Math.random() * 20}, 90%, ${65 + Math.random() * 10}%)`;
+            }
             this.draw();
         }
 
-        function createPetals() {
-            petals = [];
-            for (let i = 0; i < numPetals; i++) {
-                petals.push(new Petal());
+        function createHearts() {
+            hearts = [];
+            for (let i = 0; i < numHearts; i++) {
+                hearts.push(new Heart());
             }
         }
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            petals.forEach(petal => {
-                petal.update();
-            });
+            hearts.forEach(heart => heart.update());
             requestAnimationFrame(animate);
         }
 
-        createPetals();
+        createHearts();
         animate();
     }
 });
